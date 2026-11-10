@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Check, Video, Phone } from "lucide-react";
 import { SubPage, btnPrimary, btnSecondary } from "@/components/ui/SubPage";
@@ -8,16 +9,29 @@ import { useJourney } from "@/lib/journey";
 import { SERVICE_FEE, SERVICE_INCLUDES, SUPPORT_PHONE, SUPPORT_PHONE_TEL } from "@/lib/config";
 
 export default function ServiceDetailsPage() {
-  const { requestService } = useJourney();
+  const router = useRouter();
+  const { requestService, user, mode } = useJourney();
   const [agreed, setAgreed] = useState(false);
   const [waiver, setWaiver] = useState(false);
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   const submit = async () => {
+    if (!agreed) {
+      setResult({ ok: false, message: "Please confirm that you understand this optional service before continuing." });
+      return;
+    }
+    if (mode !== "cloud" || !user) {
+      setResult({ ok: false, message: "Your service request has not been submitted. Please sign in and return to this page, or choose a free support option below." });
+      return;
+    }
     setSending(true);
     const r = await requestService({ waiverRequested: waiver });
     setSending(false);
+    if (r.ok) {
+      router.push("/next-step");
+      return;
+    }
     setResult(
       r.ok
         ? {
@@ -70,14 +84,14 @@ export default function ServiceDetailsPage() {
           <button type="button" role="checkbox" aria-checked={agreed} onClick={() => setAgreed((v) => !v)}
             className="w-full flex items-start gap-3 p-4 rounded-[16px] bg-white border-2 border-hairline text-left focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus">
             <span className={box(agreed)} aria-hidden="true">{agreed && <Check className="w-5 h-5 text-white stroke-[3]" />}</span>
-            <span className="text-[17px] text-navy leading-relaxed">I understand this service costs {SERVICE_FEE} and is optional.</span>
+            <span id="service-acknowledgement" className="text-[17px] text-navy leading-relaxed">I understand this service costs {SERVICE_FEE} and is optional.</span>
           </button>
           <button type="button" role="checkbox" aria-checked={waiver} onClick={() => setWaiver((v) => !v)}
             className="w-full flex items-start gap-3 p-4 rounded-[16px] bg-white border-2 border-hairline text-left focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus">
             <span className={box(waiver)} aria-hidden="true">{waiver && <Check className="w-5 h-5 text-white stroke-[3]" />}</span>
             <span className="text-[17px] text-navy leading-relaxed">I&apos;d like to ask about a fee waiver.</span>
           </button>
-          <button type="button" onClick={submit} disabled={!agreed || sending} className={`${btnPrimary} disabled:opacity-50 disabled:cursor-not-allowed`}>
+          <button type="button" onClick={submit} disabled={sending} aria-describedby="service-acknowledgement" className={`${btnPrimary} disabled:opacity-50 disabled:cursor-not-allowed`}>
             {sending ? "Sending…" : "Request This Service"}
           </button>
           <a href={`tel:${SUPPORT_PHONE_TEL}`} className={btnSecondary}>

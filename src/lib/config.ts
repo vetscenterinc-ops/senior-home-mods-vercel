@@ -26,7 +26,7 @@ export const USDA_504_PROGRAM_URL =
 // HUD (24 CFR 214.313): fees must be reasonable, disclosed first, and waived for people who can't afford them.
 export const SERVICE_FEE = "$150";
 export const SERVICE_INCLUDES = [
-  "Personalized application preparation guidance",
-  "Help organizing required documents",
-  "Application readiness review",
+  "We’ll walk you through the application, one step at a time",
+  "Help you gather and organize your paperwork",
+  "Review your application with you before you send it in",
 ];

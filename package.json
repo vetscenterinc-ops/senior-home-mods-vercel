@@ -1,0 +1,41 @@
+{
+  "name": "home-mods",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test:a11y": "node scripts/test-a11y.mjs",
+    "android:dev": "node scripts/android-dev.mjs",
+    "android:sync": "CAP_ENV=dev cap sync android",
+    "android:open": "CAP_ENV=dev cap open android"
+  },
+  "dependencies": {
+    "@capacitor-firebase/authentication": "^7.5.0",
+    "@capacitor/android": "^7.6.10",
+    "@capacitor/app": "^7.1.2",
+    "@capacitor/core": "^7.6.10",
+    "@capacitor/network": "^7.0.4",
+    "firebase": "^11.4.0",
+    "lucide-react": "^1.16.0",
+    "next": "^15.2.1",
+    "react": "^19.0.0",
+    "react-aria-components": "^1.6.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@capacitor/cli": "^7.6.10",
+    "@playwright/test": "^1.50.1",
+    "@tailwindcss/postcss": "^4.0.9",
+    "@types/node": "^22.13.9",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "axe-core": "^4.10.2",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.0.9",
+    "typescript": "^5.8.2"
+  }
+}

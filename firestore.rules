@@ -1,0 +1,116 @@
+rules_version = '2';
+
+// Senior Home Mods — Firestore security rules.
+// Staff have the custom claim { staff: true } (set by an admin with the Firebase Admin SDK).
+// Homeowners can choose a pathway and sign up for published sessions,
+// but ONLY staff can verify completion or grant a documents exception.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isStaff() { return signedIn() && request.auth.token.staff == true; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // Fields a homeowner may never write.
+    function touchesStaffFields() {
+      return request.resource.data.diff(resource == null ? {} : resource.data)
+        .affectedKeys().hasAny(['verified', 'docsException', 'staffNotes']);
+    }
+    function homeownerStatusOk() {
+      return request.resource.data.status in ['not_selected', 'scheduled', 'in_progress', 'needs_staff'];
+    }
+
+    // Journey: journeys/{uid}
+    match /journeys/{uid} {
+      allow read: if isOwner(uid) || isStaff();
+      allow create, update: if isOwner(uid) && !touchesStaffFields() && homeownerStatusOk();
+      allow write: if isStaff();
+    }
+
+    // Staff-published sessions. Homeowners only see published items.
+    match /availability/{id} {
+      allow read: if signedIn() && (resource.data.published == true || isStaff());
+      allow write: if isStaff();
+    }
+    match /classes/{id} {
+      allow read: if signedIn() && (resource.data.published == true || isStaff());
+      allow write: if isStaff();
+    }
+    match /events/{id} {
+      allow read: if signedIn() && (resource.data.published == true || isStaff());
+      allow write: if isStaff();
+    }
+
+    // Sign-ups. A homeowner can sign up for a real, published item; only staff change status.
+    function itemPath(kind, id) {
+      return kind == 'meeting'
+        ? /databases/$(database)/documents/availability/$(id)
+        : kind == 'class'
+          ? /databases/$(database)/documents/classes/$(id)
+          : /databases/$(database)/documents/events/$(id);
+    }
+    match /registrations/{id} {
+      allow read: if isStaff() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'scheduled'
+        && request.resource.data.kind in ['meeting', 'class', 'event']
+        && get(itemPath(request.resource.data.kind, request.resource.data.itemId)).data.published == true;
+      allow update, delete: if isStaff();
+    }
+
+    // In-home visit requests. The homeowner asks; staff schedule, visit, and verify.
+    match /visitRequests/{id} {
+      allow read: if isStaff() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'requested'
+        && request.resource.data.photoConsent is bool;
+      allow update, delete: if isStaff();
+    }
+
+    // Optional paid service requests. The homeowner must agree to the shown terms.
+    // No payment happens here; staff follow up about payment or a fee waiver.
+    match /serviceRequests/{id} {
+      allow read: if isStaff() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'requested'
+        && request.resource.data.agreedToTerms == true
+        && request.resource.data.waiverRequested is bool;
+      allow update, delete: if isStaff();
+    }
+
+    // Document records: only when the journey is verified complete, or staff granted an exception.
+    function docsOpen(uid) {
+      let j = get(/databases/$(database)/documents/journeys/$(uid)).data;
+      return (j.status == 'completed' && j.verified != null) || j.docsException != null;
+    }
+    match /users/{uid}/documents/{docId} {
+      allow read: if isOwner(uid) || isStaff();
+      allow create: if (isOwner(uid) && docsOpen(uid)) || isStaff();
+      allow update, delete: if isStaff();
+    }
+
+    // Staff override log: who, why, when. Staff can add entries but never edit or delete them.
+    match /overrides/{id} {
+      allow read: if isStaff();
+      allow create: if isStaff()
+        && request.resource.data.staffUid == request.auth.uid
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() > 0;
+      allow update, delete: if false;
+    }
+
+    // Applications and saved programs are prepared by staff for each homeowner.
+    match /users/{uid}/applications/{id} {
+      allow read: if isOwner(uid) || isStaff();
+      allow write: if isStaff();
+    }
+    match /users/{uid}/savedPrograms/{id} {
+      allow read: if isOwner(uid) || isStaff();
+      allow write: if isStaff();
+    }
+  }
+}

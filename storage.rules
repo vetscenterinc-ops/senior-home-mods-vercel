@@ -1,0 +1,33 @@
+rules_version = '2';
+
+// Senior Home Mods — Cloud Storage rules.
+// Papers can be uploaded only after staff verify the homeowner's session (or grant an exception).
+// Home photos (optional) can be uploaded any time by the homeowner.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isStaff() { return request.auth != null && request.auth.token.staff == true; }
+    function isOwner(uid) { return request.auth != null && request.auth.uid == uid; }
+    function okFile() {
+      return request.resource.size < 20 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*') || request.resource.contentType == 'application/pdf');
+    }
+    function docsOpen(uid) {
+      let j = firestore.get(/databases/(default)/documents/journeys/$(uid)).data;
+      return (j.status == 'completed' && j.verified != null) || j.docsException != null;
+    }
+
+    match /users/{uid}/documents/{file} {
+      allow read: if isOwner(uid) || isStaff();
+      allow create: if (isOwner(uid) && docsOpen(uid) && okFile()) || isStaff();
+      allow update, delete: if isStaff();
+    }
+
+    match /users/{uid}/home-photos/{file} {
+      allow read: if isOwner(uid) || isStaff();
+      allow create: if isOwner(uid) && okFile();
+      allow delete: if isOwner(uid) || isStaff();
+    }
+  }
+}

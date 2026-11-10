@@ -55,7 +55,7 @@ export default function NextStepPage() {
     <SubPage
       eyebrow="YOUR NEXT STEP"
       title="How would you like us to help you get started?"
-      intro="Choose the option that works best for you. We'll guide you through what comes next."
+      intro="Choose how you would like to receive help. You can explore free guidance without enrolling in optional paid application preparation."
     >
       <div className="space-y-4" role="list">
         {OPTIONS.map(({ type, icon: Icon, title, text, detail, button }) => {
@@ -93,6 +93,12 @@ export default function NextStepPage() {
           );
         })}
       </div>
+
+      <section className="rounded-[22px] border border-hairline bg-sand p-5 space-y-3">
+        <h2 className="text-[19px] font-bold text-navy">Want additional application preparation?</h2>
+        <p className="text-[16px] text-navy leading-relaxed">Optional guided application support is offered separately for a disclosed $150 fee, subject to applicable fee policies. You do not need to purchase it to explore assistance.</p>
+        <Link href="/application-support/details" className="inline-flex min-h-[48px] items-center text-[17px] font-bold text-navy underline decoration-gold underline-offset-4">View optional service details</Link>
+      </section>
 
       <Link
         href="/chat"

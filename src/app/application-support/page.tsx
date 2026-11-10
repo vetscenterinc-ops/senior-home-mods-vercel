@@ -26,7 +26,7 @@ export default function ApplicationSupportPage() {
         </div>
 
         <section aria-labelledby="pkg" className="rounded-[22px] bg-white border-2 border-navy p-5 shadow-[0_12px_28px_rgba(60,40,10,0.08)]">
-          <h2 id="pkg" className="text-[17px] font-bold text-gold-text">Your Guided Application Support Package</h2>
+          <h2 id="pkg" className="text-[17px] font-bold text-gold-text">Optional Guided Application Support Package</h2>
           <p className="mt-1 flex items-baseline gap-2">
             <span className="font-[family-name:var(--font-fraunces)] font-semibold text-[46px] leading-none text-navy">{SERVICE_FEE}</span>
             <span className="text-[17px] font-bold text-muted">one-time service fee</span>
@@ -50,12 +50,12 @@ export default function ApplicationSupportPage() {
         </p>
 
         <div className="space-y-2 pt-2">
-          <Link href="/application-support/details" className={btnPrimary}>Continue With My Application</Link>
+          <Link href="/next-step" className={btnPrimary}>Choose How I Want Help</Link>
           <Link
-            href="/application-support/details#other-options"
+            href="/application-support/details"
             className="flex items-center justify-center min-h-[48px] text-[18px] font-bold text-navy underline decoration-gold underline-offset-4"
           >
-            View Service Details &amp; Other Options
+            Learn About Optional Guided Application Support
           </Link>
         </div>
       </main>

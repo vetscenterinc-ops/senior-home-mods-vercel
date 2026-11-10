@@ -56,9 +56,9 @@ export default function QuestionsPage() {
 
           <div className="space-y-2 pt-2">
             <Eyebrow>ABOUT THE HOME</Eyebrow>
-            <PageTitle>Which areas need repairs or are hard to use?</PageTitle>
+            <PageTitle>What part of your home do you need to make safer?</PageTitle>
             <p className="text-[17px] text-muted">
-              Choose all that apply.
+              Your comfort and safety matter. Choose any areas where you would like help.
             </p>
           </div>
 

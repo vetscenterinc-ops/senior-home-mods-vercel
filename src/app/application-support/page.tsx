@@ -21,7 +21,7 @@ export default function ApplicationSupportPage() {
         <div className="space-y-3">
           <PageTitle>Great News! Let&apos;s Get Your Application Ready.</PageTitle>
           <p className="text-[18px] text-muted leading-relaxed">
-            Based on your first screening, you may qualify for a home repair grant or loan. Our team can help you get ready for the next steps.
+            Based on your first screening, you may qualify for a home repair grant or loan. You don&apos;t have to figure it all out alone. Our team is here to help you understand what comes next.
           </p>
         </div>
 
